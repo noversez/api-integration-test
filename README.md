@@ -21,34 +21,37 @@
 
 ### 1. Клонируй репозиторий и установи зависимости
 
+```bash
 git clone https://github.com/your-org/betting-api.git
 cd betting-api
 pnpm install
+```
 
 ### 2. Создай файл .env (можно воспользоваться шаблоном .env.example)
 
-DATABASE_URL=postgresql://postgres:postgres@db:5432/betting_db
-JWT_SECRET=your-jwt-secret
-BET_API_URL=https://bets.tgapps.cloud/api
-ADMIN_TOKEN=your-admin-token
+- DATABASE_URL=postgresql://postgres:postgres@db:5432/betting_db
+- JWT_SECRET=your-jwt-secret
+- BET_API_URL=https://bets.tgapps.cloud/api
+- ADMIN_TOKEN=your-admin-token
 
 ### 3. Миграции и сиды 
 
+```bash
 npx prisma migrate dev --name init
 npx prisma db seed
+```
 
 ### 4. Запуск тестов
-
+```bash
 npx jest
-
+```
 ### 5. Запуск проекта
-
+```bash
 pnpm run dev
-
+```
 ### 6. Swagger/OpenAPI
 
 - Интерактивная документация: http://localhost:3000/docs
-- Описание всех ручек, моделей, авторизация через JWT прямо в Swagger UI
 
 ---
 
@@ -74,36 +77,21 @@ BET_API_URL — адрес внешнего API ставок
 ADMIN_TOKEN — токен для доступа к internal API
 
 ---
-
+## Структура проекта
+```bash
 .
 ├── src/
-│   ├── controllers/      # Контроллеры (Fastify handlers)
-│   ├── services/         # Бизнес-логика/интеграции
-│   ├── routes/           # Fastify роутеры
-│   ├── middlewares/      # Аутентификация, авторизация
-│   ├── externalApi/      # Внешние клиенты API
-│   ├── prisma/           # Миграции, schema.prisma, seed
-│   └── test/             # Unit/интеграционные тесты
-├── openapi.yaml          # Полная OpenAPI документация
-├── docker-compose.yml    # Запуск через Docker Compose
-├── Dockerfile            # (если нужен для деплоя)
-├── .env                  # Переменные окружения (добавить самому!)
+│   ├── controllers/      
+│   ├── services/         
+│   ├── routes/           
+│   ├── middlewares/      
+│   ├── externalApi/      
+│   ├── prisma/           
+│   └── test/             
+├── openapi.yaml          
+├── docker-compose.yml    
+├── Dockerfile            
+├── .env                  
 └── README.md
-
----
-
-## Проверка endpoint-ов
-
-1. Получить JWT через /api/auth/login
-2. Передавать JWT в Authorization: Bearer {token} ко всем защищённым ручкам
-3. Использовать Swagger UI для теста ручек
-4. Для internal endpoint-ов использовать токен ADMIN_TOKEN
-
----
-
-## Тестовые пользователи (пример)
-
-username: test11user11  
-(см. seed, внешний аккаунт, secret в .env)
-
+```
 ---
