@@ -19,7 +19,7 @@
 
 ## Быстрый старт
 
-### 1. Клонируй репозиторий и установи зависимости
+### 1. Клонирование репозитория и установка зависимостей
 
 ```bash
 git clone https://github.com/your-org/betting-api.git
@@ -27,7 +27,7 @@ cd betting-api
 pnpm install
 ```
 
-### 2. Создай файл .env (можно воспользоваться шаблоном .env.example)
+### 2. Инициализация .env (можно воспользоваться шаблоном .env.example)
 
 - DATABASE_URL=postgresql://postgres:postgres@db:5432/betting_db
 - JWT_SECRET=your-jwt-secret
