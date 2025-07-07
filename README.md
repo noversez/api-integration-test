@@ -29,10 +29,11 @@ pnpm install
 
 ### 2. Инициализация .env (можно воспользоваться шаблоном .env.example)
 
-- DATABASE_URL=postgresql://postgres:postgres@db:5432/betting_db
-- JWT_SECRET=your-jwt-secret
+- DATABASE_URL=postgresql://postgres:postgres@localhost:5432/betting_db
 - BET_API_URL=https://bets.tgapps.cloud/api
-- ADMIN_TOKEN=your-admin-token
+- SECRET_KEY=secretkey
+- PORT=3000
+- ADMIN_TOKEN=admintoken
 
 ### 3. Миграции и сиды 
 
