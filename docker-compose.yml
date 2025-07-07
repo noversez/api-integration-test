@@ -1,0 +1,37 @@
+version: '3.9'
+services:
+  db:
+    image: postgres:15
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: betting_db
+    ports:
+      - '5432:5432'
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  app:
+    build: .
+    command: sh -c "pnpm prisma migrate deploy && pnpm run dev"
+    volumes:
+      - ./:/usr/src/app
+    ports:
+      - "3000:3000"
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/betting_db
+      - SECRET_KEY=your-secret-key
+      - BET_API_URL=https://bets.tgapps.cloud/api
+      - ADMIN_TOKEN=your-admin-token
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  pgdata:

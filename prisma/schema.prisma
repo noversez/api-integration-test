@@ -1,0 +1,90 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id             Int                     @id @default(autoincrement())
+  username       String                  @unique
+  email          String?                 @unique
+  last_login     DateTime?
+  created_at     DateTime                @default(now())
+  updated_at     DateTime                @updatedAt
+
+  externalApiAccounts ExternalApiAccount[]
+  bets           Bet[]
+  transactions   Transaction[]
+  apiLogs        ApiLog[]
+  userBalance    UserBalance?
+}
+
+model ExternalApiAccount {
+  id               Int      @id @default(autoincrement())
+  user_id          Int
+  external_user_id String   @unique
+  external_secret_key String
+  is_active        Boolean  @default(true)
+  created_at       DateTime @default(now())
+  updated_at       DateTime @updatedAt
+
+  user User @relation(fields: [user_id], references: [id])
+}
+
+model Bet {
+  id               Int       @id @default(autoincrement())
+  user_id          Int
+  external_bet_id  String    @unique
+  amount           Decimal
+  status           String
+  win_amount       Decimal?
+  created_at       DateTime  @default(now())
+  updated_at       DateTime  @updatedAt
+  completed_at     DateTime?
+
+  user User @relation(fields: [user_id], references: [id])
+  transactions Transaction[]
+}
+
+model Transaction {
+  id            Int      @id @default(autoincrement())
+  user_id       Int
+  bet_id        Int?
+  type          String
+  amount        Decimal
+  balance_before Decimal
+  balance_after  Decimal
+  created_at    DateTime @default(now())
+  description   String?
+
+  user User @relation(fields: [user_id], references: [id])
+  bet  Bet? @relation(fields: [bet_id], references: [id])
+}
+
+model ApiLog {
+  id              Int      @id @default(autoincrement())
+  user_id         Int?
+  endpoint        String
+  method          String
+  request_body    Json?
+  response_body   Json?
+  status_code     Int?
+  created_at      DateTime @default(now())
+  request_duration_ms Int?
+  ip_address      String?
+
+  user User? @relation(fields: [user_id], references: [id])
+}
+
+model UserBalance {
+  id               Int      @id @default(autoincrement())
+  user_id          Int      @unique
+  balance          Decimal
+  external_balance Decimal?
+  last_checked_at  DateTime?
+
+  user User @relation(fields: [user_id], references: [id])
+}

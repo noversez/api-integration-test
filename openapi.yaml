@@ -1,0 +1,567 @@
+openapi: 3.0.3
+info:
+  title: Betting API
+  version: '1.0.0'
+  description: |
+    Полная документация API сервиса для интеграции с платформой ставок, управления пользователями, балансом, ставками и внутренними тестовыми endpoint-ами.
+
+servers:
+  - url: http://localhost:3000
+
+tags:
+  - name: Auth
+    description: Аутентификация и получение токенов
+  - name: Bets
+    description: Работа со ставками
+  - name: Balance
+    description: Управление балансом пользователя
+  - name: Transactions
+    description: История транзакций
+  - name: Internal
+    description: Внутренние endpoint-ы для тестирования и интеграции
+  - name: System
+    description: Системные endpoint-ы
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+        message:
+          type: string
+    Bet:
+      type: object
+      properties:
+        id:
+          type: integer
+        external_bet_id:
+          type: string
+        amount:
+          type: number
+        status:
+          type: string
+        win_amount:
+          type: number
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+        completed_at:
+          type: string
+          format: date-time
+          nullable: true
+    BetsList:
+      type: object
+      properties:
+        bets:
+          type: array
+          items:
+            $ref: '#/components/schemas/Bet'
+    Balance:
+      type: object
+      properties:
+        balance:
+          type: number
+        last_updated:
+          type: string
+          format: date-time
+    Transaction:
+      type: object
+      properties:
+        id:
+          type: integer
+        user_id:
+          type: integer
+        amount:
+          type: number
+        type:
+          type: string
+        bet_id:
+          type: integer
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+        balance_before:
+          type: number
+        balance_after:
+          type: number
+        description:
+          type: string
+    TransactionsList:
+      type: object
+      properties:
+        transactions:
+          type: array
+          items:
+            $ref: '#/components/schemas/Transaction'
+        pagination:
+          type: object
+          properties:
+            total:
+              type: integer
+            page:
+              type: integer
+            limit:
+              type: integer
+            pages:
+              type: integer
+    AuthResponse:
+      type: object
+      properties:
+        token:
+          type: string
+        expiresIn:
+          type: integer
+
+paths:
+
+  /api/auth/login:
+    post:
+      tags: [Auth]
+      summary: Логин пользователя
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [username]
+              properties:
+                username:
+                  type: string
+                  example: test11user11
+      responses:
+        '200':
+          description: Успешная аутентификация
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '400':
+          description: Ошибка валидации
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/bets:
+    post:
+      tags: [Bets]
+      summary: Размещение ставки
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [amount]
+              properties:
+                amount:
+                  type: number
+                  minimum: 1
+                  maximum: 5
+                  example: 3
+      responses:
+        '200':
+          description: Ставка размещена
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Bet'
+        '400':
+          description: Ошибка валидации
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Дублирующая ставка (идемпотентность)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    get:
+      tags: [Bets]
+      summary: Получить историю ставок пользователя
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Список ставок
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BetsList'
+
+  /api/bets/{id}:
+    get:
+      tags: [Bets]
+      summary: Получить одну ставку по id
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Детали ставки
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Bet'
+        '404':
+          description: Ставка не найдена
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/bets/recommended:
+    get:
+      tags: [Bets]
+      summary: Получить рекомендуемую сумму ставки
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Рекомендованная сумма
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  recommended_amount:
+                    type: number
+
+  /api/win:
+    post:
+      tags: [Bets]
+      summary: Проверить результат по ставке
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [bet_id]
+              properties:
+                bet_id:
+                  type: string
+      responses:
+        '200':
+          description: Результат ставки
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  win:
+                    type: number
+                  message:
+                    type: string
+        '404':
+          description: Ставка не найдена
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/balance:
+    post:
+      tags: [Balance]
+      summary: Получить баланс пользователя
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Баланс пользователя
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Balance'
+
+  /api/transactions:
+    get:
+      tags: [Transactions]
+      summary: Получить историю транзакций пользователя (с пагинацией)
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+        - in: query
+          name: limit
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Список транзакций с пагинацией
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TransactionsList'
+
+  /api/whoami:
+    get:
+      tags: [Auth]
+      summary: Получить информацию о пользователе (по JWT)
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Информация о пользователе
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                  username:
+                    type: string
+
+  /api/health:
+    get:
+      tags: [System]
+      summary: Healthcheck сервиса
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  timestamp:
+                    type: string
+                  services:
+                    type: object
+                    properties:
+                      api:
+                        type: string
+                      database:
+                        type: string
+                      external_api:
+                        type: string
+
+  # ================= ВНУТРЕННИЕ ENDPOINT-Ы ===================
+
+  /api/internal/auth:
+    post:
+      tags: [Internal]
+      summary: Проверка аутентификации пользователя во внешнем API
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [user_id]
+              properties:
+                user_id:
+                  type: string
+      responses:
+        '200':
+          description: Успех
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  external_response:
+                    type: object
+
+  /api/internal/bet:
+    get:
+      tags: [Internal]
+      summary: Получить рекомендуемую ставку (внешний API)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: user_id
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Успех
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  external_response:
+                    type: object
+
+    post:
+      tags: [Internal]
+      summary: Сделать ставку (внешний API)
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [user_id, bet]
+              properties:
+                user_id:
+                  type: string
+                bet:
+                  type: number
+      responses:
+        '200':
+          description: Успех
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  external_response:
+                    type: object
+
+  /api/internal/win:
+    post:
+      tags: [Internal]
+      summary: Получить результат ставки (внешний API)
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [user_id, bet_id]
+              properties:
+                user_id:
+                  type: string
+                bet_id:
+                  type: string
+      responses:
+        '200':
+          description: Успех
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  external_response:
+                    type: object
+
+  /api/internal/balance:
+    post:
+      tags: [Internal]
+      summary: Установить/получить баланс пользователя во внешнем API
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                user_id:
+                  type: string
+                balance:
+                  type: number
+                  nullable: true
+      responses:
+        '200':
+          description: Успех
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  external_response:
+                    type: object
+
+  /api/internal/check-balance:
+    post:
+      tags: [Internal]
+      summary: Проверить баланс пользователя во внешнем API
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [user_id, expected_balance]
+              properties:
+                user_id:
+                  type: string
+                expected_balance:
+                  type: number
+      responses:
+        '200':
+          description: Проверка баланса
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  external_response:
+                    type: object
+
+  /api/internal/logs:
+    get:
+      tags: [Internal]
+      summary: Получить последние 50 логов обращений к внешнему API
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Список логов
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  logs:
+                    type: array
+                    items:
+                      type: object
+
+security:
+  - bearerAuth: []
