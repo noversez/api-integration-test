@@ -68,15 +68,6 @@ pnpm run dev
 - /api/internal/ — внутренние endpoint-ы для интеграции/тестирования (JWT admin)
 
 ---
-
-## Переменные окружения
-
-DATABASE_URL — строка подключения к Postgres  
-JWT_SECRET — секрет для подписи JWT  
-BET_API_URL — адрес внешнего API ставок  
-ADMIN_TOKEN — токен для доступа к internal API
-
----
 ## Структура проекта
 ```bash
 .
