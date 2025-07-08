@@ -2,8 +2,6 @@
 
 **Backend сервис для интеграции с платформой ставок, управления пользователями, ставками и балансом.**
 
----
-
 ## Возможности
 
 - JWT-аутентификация пользователей
@@ -17,7 +15,30 @@
 
 ---
 
-## Быстрый старт
+## Быстрый старт (Docker)
+### 1. Клонирование репозитория и переход в директорию проекта
+```bash
+git clone https://github.com/noversez/api-integration-test.git
+cd api-integration-test
+```
+### 2. Создание файла .env
+Создайте .env на основе .env.example (или вручную пропишите переменные):
+- DATABASE_URL=postgresql://postgres:postgres@localhost:5432/betting_db
+- BET_API_URL=https://bets.tgapps.cloud/api
+- SECRET_KEY=secretkey
+- PORT=3000
+- ADMIN_TOKEN=admintoken
+
+### 3. Сборка и запуск через Docker-compose
+```bash
+docker-compose up --build
+```
+- >  **Swagger-документация:** http://localhost:3000/docs
+- >  **Сервер:** http://localhost:3000
+
+---
+
+## Быстрый старт (Локально)
 
 ### 1. Клонирование репозитория и установка зависимостей
 
