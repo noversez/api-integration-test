@@ -8,7 +8,7 @@ services:
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: betting_db
     ports:
-      - '5432:5432'
+      - '5434:5432'
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
@@ -19,9 +19,9 @@ services:
 
   app:
     build: .
-    command: sh -c "pnpm prisma migrate deploy && pnpm run dev"
-    volumes:
-      - ./:/usr/src/app
+    command: sh -c "npx prisma migrate deploy && pnpm run dev"
+    # volumes:
+    #   - ./:/usr/src/app
     ports:
       - "3000:3000"
     environment:
