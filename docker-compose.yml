@@ -19,7 +19,7 @@ services:
 
   app:
     build: .
-    command: sh -c "npx prisma migrate deploy && pnpm run dev"
+    command: sh -c "npx prisma migrate deploy && npx prisma db seed && pnpm run dev"
     # volumes:
     #   - ./:/usr/src/app
     ports:
