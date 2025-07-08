@@ -23,7 +23,7 @@ cd api-integration-test
 ```
 ### 2. Создание файла .env
 Создайте .env на основе .env.example (или вручную пропишите переменные):
-- DATABASE_URL=postgresql://postgres:postgres@localhost:5432/betting_db
+- DATABASE_URL=postgresql://postgres:postgres@db:5432/betting_db
 - BET_API_URL=https://bets.tgapps.cloud/api
 - SECRET_KEY=secretkey
 - PORT=3000
