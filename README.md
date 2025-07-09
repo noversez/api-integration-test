@@ -83,7 +83,7 @@ pnpm run dev
 - POST /api/bets — разместить ставку (JWT обязателен)
 - POST /api/win — получить результат ставки
 - POST /api/balance — получить баланс
-- GET /api/transactions — история транзакций (с пагинацией)
+- GET /api/transactions — история транзакций
 - GET /api/bets — история ставок пользователя
 - GET /api/bets/:id — получить ставку по id
 - GET /api/bets/recommended — рекомендуемая ставка
